@@ -1,7 +1,7 @@
 # Compatibility Python 2/3
 from __future__ import division, print_function, absolute_import
 from builtins import range
-# ----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 import numpy as np
@@ -28,7 +28,9 @@ class BO(IterativeOptimizer):
         :param task:
         :param parameters:
         """
-        super(BO, self).__init__(task=task, stopCriteria=stopCriteria, parameters=parameters)
+        super(BO, self).__init__(task=task, 
+                                 stopCriteria=stopCriteria, 
+                                 parameters=parameters)
         self.name = 'Bayesian Optimization'
         self.order = 0
         # ---
@@ -41,7 +43,7 @@ class BO(IterativeOptimizer):
         self.n_initial_evals = parameters.get('n_initial_evals', 10)
         self.log_best_mean = False  # optimize mean acq_func at each step
 
-        self.store_model = True  # Should we store all models for logging purposes?
+        self.store_model = True  # Should we store all models for logging?
         self._model = None  # Current model
         self._logs.data.m = None
         self._logs.data.v = None
@@ -54,14 +56,18 @@ class BO(IterativeOptimizer):
         """
         if (self._iter == 0) and (self.past_evals is None):
             # If there are no past evaluations, randomly initialize
-            logging.info('Initializing with %d random evaluations' % self.n_initial_evals)
+            logging.info('Initializing with %d random evaluations' \
+                    % self.n_initial_evals)
             self._logs.data.model = [None]
-            return self.task.get_bounds().sample_uniform((self.n_initial_evals, self.task.get_n_parameters()))
+            return self.task.get_bounds() \
+                            .sample_uniform((self.n_initial_evals, 
+                                             self.task.get_n_parameters()))
         else:
             # TODO: use past_evals
             # Create model
             logging.info('Fitting response surface')
-            dataset = rdata.dataset(data_input=self._logs.get_parameters(), data_output=self._logs.get_objectives())
+            dataset = rdata.dataset(data_input=self._logs.get_parameters(), 
+                                    data_output=self._logs.get_objectives())
             # print(dataset)
             p = DotMap()
             p.verbosity = 0
@@ -85,7 +91,9 @@ class BO(IterativeOptimizer):
             stopCriteria = StopCriteria(maxEvals=self.optimizer.maxEvals)
             p = DotMap()
             p.verbosity = 1
-            acq_opt = self.optimizer.optimizer(parameters=p, task=task, stopCriteria=stopCriteria)
+            acq_opt = self.optimizer.optimizer(parameters=p, 
+                                               task=task, 
+                                               stopCriteria=stopCriteria)
             x = np.matrix(acq_opt.optimize())  # Optimize
             fx = self._model.predict(dataset=x.T)
 
@@ -94,8 +102,10 @@ class BO(IterativeOptimizer):
                 self._logs.data.m = np.matrix(fx[0])
                 self._logs.data.v = np.matrix(fx[1])
             else:
-                self._logs.data.m = np.concatenate((self._logs.data.m, fx[0]), axis=0)
-                self._logs.data.v = np.concatenate((self._logs.data.v, fx[1]), axis=0)
+                self._logs.data.m = np.concatenate((self._logs.data.m, fx[0]),
+                                                    axis=0)
+                self._logs.data.v = np.concatenate((self._logs.data.v, fx[1]),
+                                                    axis=0)
             if self.store_model:
                 if self._logs.data.model is None:
                     self._logs.data.model = [self._model]
@@ -117,15 +127,23 @@ class BO(IterativeOptimizer):
                 stopCriteria = StopCriteria(maxEvals=self.optimizer.maxEvals)
                 p = DotMap()
                 p.verbosity = 1
-                mean_opt = self.optimizer.optimizer(parameters=p, task=task, stopCriteria=stopCriteria)
+                mean_opt = self.optimizer.optimizer(parameters=p,
+                                                    task=task,
+                                                    stopCriteria=stopCriteria)
                 best_x = np.matrix(acq_opt.optimize())  # Optimize
                 best_fx = self._model.predict(dataset=best_x.T)
                 if self._iter == 1:
                     self._logs.data.best_m = np.matrix(best_fx[0])
                     self._logs.data.best_v = np.matrix(best_fx[1])
                 else:
-                    self._logs.data.best_m = np.concatenate((self._logs.data.best_m, best_fx[0]), axis=0)
-                    self._logs.data.best_v = np.concatenate((self._logs.data.best_v, best_fx[1]), axis=0)
+                    self._logs.data.best_m = np.concatenate(
+                                                    (self._logs.data.best_m, 
+                                                    best_fx[0]), 
+                                                axis=0)
+                    self._logs.data.best_v = np.concatenate(
+                                                    (self._logs.data.best_v, 
+                                                    best_fx[1]), 
+                                                axis=0)
 
             return x
 
@@ -155,18 +173,34 @@ class BO(IterativeOptimizer):
             plt.plot(logs.get_objectives().T, c='red', linewidth=2)
             plt.ylabel('Obj.Func.')
             n_evals = logs.data.m.shape[0]
-            x = np.arange(start=logs.get_n_evals() - n_evals, stop=logs.get_n_evals())
-            spp.gauss_1D(y=logs.data.m, variance=logs.data.v, x=x, color='blue')
+            x = np.arange(start=logs.get_n_evals() - n_evals, 
+                          stop=logs.get_n_evals())
+            spp.gauss_1D(y=logs.data.m, 
+                         variance=logs.data.v, 
+                         x=x, 
+                         color='blue')
             if self.log_best_mean:
-                spp.gauss_1D(y=logs.data.best_m, variance=logs.data.best_v, x=x, color='green')
+                spp.gauss_1D(y=logs.data.best_m,
+                             variance=logs.data.best_v,
+                             x=x, 
+                             color='green')
         else:
-            plt.plot(logs.get_objectives().T-self.task.opt_obj, c='red', linewidth=2)
+            plt.plot(logs.get_objectives().T-self.task.opt_obj,
+                     c='red',
+                     linewidth=2)
             plt.ylabel('Optimality gap')
             n_evals = logs.data.m.shape[0]
-            x = np.arange(start=logs.get_n_evals() - n_evals, stop=logs.get_n_evals())
-            spp.gauss_1D(y=logs.data.m-self.task.opt_obj, variance=logs.data.v, x=x, color='blue')
+            x = np.arange(start=logs.get_n_evals() - n_evals,
+                         stop=logs.get_n_evals())
+            spp.gauss_1D(y=logs.data.m-self.task.opt_obj,
+                         variance=logs.data.v,
+                         x=x,
+                         color='blue')
             if self.log_best_mean:
-                spp.gauss_1D(y=logs.data.best_m-self.task.opt_obj, variance=logs.data.best_v, x=x, color='green')
+                spp.gauss_1D(y=logs.data.best_m-self.task.opt_obj,
+                             variance=logs.data.best_v,
+                             x=x,
+                             color='green')
 
         plt.xlabel('N. Evaluations')
         if scale == 'log':
