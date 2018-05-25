@@ -34,13 +34,13 @@ class BO(IterativeOptimizer):
         self.name = 'Bayesian Optimization'
         self.order = 0
         # ---
-        self.acq_func = parameters.get('acq_func', EI(model=None, logs=None))
+        self.acq_func = parameters.get('acq_func', default=EI(model=None, logs=None))
         self.optimizer = DotMap()
-        self.optimizer.optimizer = parameters.get('optimizer', CMAES)
+        self.optimizer.optimizer = parameters.get('optimizer', default=CMAES)
         self.optimizer.maxEvals = 20000
-        self.model = parameters.get('model', rregression.GP)
-        self.past_evals = parameters.get('past_evals', None)
-        self.n_initial_evals = parameters.get('n_initial_evals', 10)
+        self.model = parameters.get('model', default=rregression.GP)
+        self.past_evals = parameters.get('past_evals', default=None)
+        self.n_initial_evals = parameters.get('n_initial_evals', default=10)
         self.log_best_mean = False  # optimize mean acq_func at each step
 
         self.store_model = True  # Should we store all models for logging?
@@ -151,16 +151,21 @@ class BO(IterativeOptimizer):
         # TODO: plot also model (see plot_optimization_curve)
         if self._iter == 0:
             self._fig = plt.figure()
-            self._objectives_curve, = plt.plot(self.get_logs().get_objectives().T, linewidth=2, color='blue')
-            # self._objectives_curve, = plt.plot(self.get_logs().get_objectives().T, linewidth=2, color='red')
+            self._objectives_curve, _ = plt.plot(
+                                            self.get_logs().get_objectives().T,
+                                            linewidth=2,
+                                            color='blue')
             plt.ylabel('Obj.Func.')
             plt.xlabel('N. Evaluations')
         else:
-            self._objectives_curve.set_data(np.arange(self.get_logs().get_n_evals()),
-                                            self.get_logs().get_objectives().T)
+            self._objectives_curve.set_data(np.arange(self.get_logs()
+                                                        .get_n_evals()),
+                                                      self.get_logs()
+                                                        .get_objectives().T)
             self._fig.canvas.draw()
             plt.xlim([0, self.get_logs().get_n_evals()])
-            plt.ylim([np.min(self.get_logs().get_objectives()), np.max(self.get_logs().get_objectives())])
+            plt.ylim([np.min(self.get_logs().get_objectives()), 
+                      np.max(self.get_logs().get_objectives())])
 
     def plot_optimization_curve(self, scale='log', plotDelta=True):
         import scipyplot as spp

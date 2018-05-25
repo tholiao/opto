@@ -30,6 +30,7 @@ class EI(AcquisitionFunction):
         s = np.sqrt(var)
         s[s == 0] = np.spacing(1)  # To avoid numerical instabilities
         z = (self.target - mean) / s
+        # see [Jones et al., 1998] for derivation of the following
         f = s * (z * norm.cdf(z) + norm.pdf(z))
         # f = (eta - m - self.par) * norm.cdf(z) + s * norm.pdf(z)  # Alternative
         f = -f  # Optimizer minimize acq.func.
