@@ -1,0 +1,3 @@
+[submodule "kmedoids"]
+	path = kmedoids
+	url = https://github.com/letiantian/kmedoids.git
