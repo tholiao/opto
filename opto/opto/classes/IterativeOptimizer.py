@@ -1,7 +1,7 @@
 # Compatibility Python 2/3
 from __future__ import division, print_function, absolute_import
 from builtins import range
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 import numpy as np
 from dotmap import DotMap
@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 class IterativeOptimizer(Optimizer):
     """
-    This is an abstract class for all iterative optimizers (i.e., most of the optimizers out there)
+    This is an abstract class for all iterative optimizers
+    (i.e., most of the optimizers out there)
     """
 
     def __init__(self, task, stopCriteria, parameters=DotMap()):
@@ -26,8 +27,8 @@ class IterativeOptimizer(Optimizer):
         self._iter = 0  # Number of iterations
         self.last_x = None  # store the last parameters evaluated
         self.last_fx = None  # and the corresponding obj.func.
-        self.last_gx = None  # and eventually also the gradients (not stored in the logs)
-        self.last_hx = None  # and eventually eventually also the hessian (not stored in the logs)
+        self.last_gx = None  # and eventually also the gradients (not logged)
+        self.last_hx = None  # and eventually also the hessian (not logged)
 
         self._fig = []  # Pointer to the figure draw if visualize=True
         self._objectives_curve = []
@@ -73,10 +74,8 @@ class IterativeOptimizer(Optimizer):
                     [n_parameters * [self._iter + 1]])
             else:
                 self._logs.data.evals_n_iters = np.hstack((
-                                                          self._logs.data.evals_n_iters,
-                                                          np.array([
-                                                                       n_parameters * [
-                                                                           self._iter + 1]])))
+                    self._logs.data.evals_n_iters,
+                    np.array([n_parameters * [self._iter + 1]])))
 
             # Logs
             idx_best = np.argmin(self.last_fx)
@@ -105,7 +104,8 @@ class IterativeOptimizer(Optimizer):
             # SOO
             if self._iter == 0:
 
-                # self._objectives_curve, = plt.plot(self.get_logs().get_objectives().T, linewidth=2)
+                # self._objectives_curve, = plt.plot(self.get_logs()
+                #   .get_objectives().T, linewidth=2)
                 # plt.ylabel('Obj.Func.')
                 # plt.xlabel('Evaluations')
 
@@ -164,19 +164,33 @@ class IterativeOptimizer(Optimizer):
             h = plt.plot(logs.get_objectives().T, c='red', linewidth=2)
             plt.ylabel('Obj.Func.')
             # n_evals = logs.data.m.shape[0]
-            # x = np.arange(start=logs.get_n_evals() - n_evals, stop=logs.get_n_evals())
-            # spp.gauss_1D(y=logs.data.m, variance=logs.data.v, x=x, color='blue')
+            # x = np.arange(start=logs.get_n_evals() - n_evals,
+            #               stop=logs.get_n_evals())
+            # spp.gauss_1D(y=logs.data.m,
+            #              variance=logs.data.v,
+            #              x=x,
+            #              color='blue')
             # if self.log_best_mean:
-            #     spp.gauss_1D(y=logs.data.best_m, variance=logs.data.best_v, x=x, color='green')
+            #     spp.gauss_1D(y=logs.data.best_m,
+            #                  variance=logs.data.best_v,
+            #                  x=x,
+            #                  color='green')
         else:
             h = plt.plot(logs.get_objectives().T - self.task.opt_obj, c='red',
                          linewidth=2)
             plt.ylabel('Optimality gap')
             # n_evals = logs.data.m.shape[0]
-            # x = np.arange(start=logs.get_n_evals() - n_evals, stop=logs.get_n_evals())
-            # spp.gauss_1D(y=logs.data.m - self.task.opt_obj, variance=logs.data.v, x=x, color='blue')
+            # x = np.arange(start=logs.get_n_evals() - n_evals,
+            #               stop=logs.get_n_evals())
+            # spp.gauss_1D(y=logs.data.m - self.task.opt_obj,
+            #              variance=logs.data.v,
+            #              x=x,
+            #              color='blue')
             # if self.log_best_mean:
-            #     spp.gauss_1D(y=logs.data.best_m - self.task.opt_obj, variance=logs.data.best_v, x=x, color='green')
+            #     spp.gauss_1D(y=logs.data.best_m - self.task.opt_obj,
+            #                  variance=logs.data.best_v,
+            #                  x=x,
+            #                  color='green')
 
         plt.xlabel('Evaluations')
         plt.legend(h, 'Evaluated obj.func.')
@@ -186,7 +200,9 @@ class IterativeOptimizer(Optimizer):
 
         # TODO: best performance expected
         # if self.log_best_mean:
-        #     plt.legend(['Performance evaluated', 'performance expected', 'Best performance expected'])
+        #     plt.legend(['Performance evaluated',
+        #                 'Performance expected',
+        #                 'Best performance expected'])
         # else:
         #     plt.legend(['Performance evaluated', 'performance expected'])
         plt.show()
