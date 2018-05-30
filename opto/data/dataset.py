@@ -375,12 +375,16 @@ class dataset(object):
         return self._hasLabels
 
     def copy(self):
+        """
+        Returns a copy of this dataset
+        :return: a copy of this dataset
+        """
         return copy.deepcopy(self)
 
     def merge(self, other_dataset):
         self.check_compatibility(other_dataset)  # Do all the asserts to check that the two datasets are compatible
 
-        out = copy.deepcopy(self)
+        out = self.copy()
         out.n_data += other_dataset.get_n_data()
         out.input = np.concatenate((out.input, other_dataset.input), axis=1)
         out.output = np.concatenate((out.output, other_dataset.output), axis=1)
