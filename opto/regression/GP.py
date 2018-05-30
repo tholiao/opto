@@ -67,16 +67,36 @@ class GP(model):
 
     def _predict(self, dataset):
         n_data = dataset.get_n_data()
-        mean = np.zeros((n_data, self.n_outputs))
-        var = np.zeros((n_data, self.n_outputs))
+        dimensions = (n_data, self.n_outputs)
+        mean = np.zeros(dimensions)
+        var = np.zeros(dimensions)
+
         for i in range(self.n_outputs):
             t_mean, t_var = self._model[i].predict(np.array(dataset.get_input().T))
             mean[:, i] = t_mean.T
             var[:, i] = t_var.T
+
+        # Clip negative variances to zero
         if np.any(var < 0):
             # logging.info('Variance is negative...')
-            var[var < 0] = 0  # Make sure that variance is always positive
+            var[var < 0] = 0
+
         return mean, var
+
+    def sample_posterior(self, dataset, size=5):
+        mean, var = self._predict(dataset)
+
+        def sim_one_dim(mean, var):
+            return np.random.multivariate_normal(mean.flatten(), var, size).T
+
+        if self.n_outputs == 1:
+            return sim_one_dim(mean, var)
+        else:
+            fsim = np.empty((self.n_outputs, dataset.n_data, size))
+            for d in range(self.n_outputs):
+                fsim[d] = sim_one_dim(mean[:,d], var)
+
+        return fsim
 
     def get_hyperparameters(self):
         return self._model._param_array_
