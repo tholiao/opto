@@ -374,6 +374,9 @@ class dataset(object):
     def hasLabel(self):
         return self._hasLabels
 
+    def copy(self):
+        return copy.deepcopy(self)
+
     def merge(self, other_dataset):
         self.check_compatibility(other_dataset)  # Do all the asserts to check that the two datasets are compatible
 
