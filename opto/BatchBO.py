@@ -32,7 +32,7 @@ class BatchBO(IterativeOptimizer):
         :param task:
         :param parameters:
         """
-        super(BO, self).__init__(task=task,
+        super(BatchBO, self).__init__(task=task,
                                  stopCriteria=stopCriteria,
                                  parameters=parameters)
         self.name = 'Bayesian Optimization'
