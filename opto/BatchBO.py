@@ -134,7 +134,6 @@ class BO(IterativeOptimizer):
         def prob_a_geq_b(m_normalized):
             def helper(a):
                 return 1 - norm.cdf(-a)
-
             helper_vect = np.vectorize(helper)
             return helper_vect(m_normalized)
 
@@ -147,18 +146,31 @@ class BO(IterativeOptimizer):
 
         return Ws
 
-    def _match_experiments(self, Xs_sample: np.array, weights: np.array,
+    def _match_experiments(self, X: np.array, W: np.array,
                            k: int) -> np.array:
         """
         given n experiments weighted by the probability they are the
             maximizer, return k of them that are most representative
-            approximates to k_medoids
+        approximates to k_medoids
         """
-        Xs_batch = None
+        B = X
 
-        
+        def obj(X, W, B):
+            sum = 0
+            for i in range(X.shape[0]):
+                nbrs = NearestNeighbors(n_neighbors=1).fit(B)
+                dists, _ = nbrs.kneighbors(X)
+                sum += W[i] * dists[i]
+            return sum
 
-        return Xs_batch
+        # greedily remove elements until we have k of them left
+        for _ in range(X.shape[0] - k):
+            # compute the objective value with one element of batch removed
+            for i in range(X.shape[0]):
+                objs = obj(X, W, np.delete(B, i))
+            np.delete(X, np.argmin(objs))
+
+        return X
 
     def _select_parameters(self):
         """
@@ -189,7 +201,6 @@ class BO(IterativeOptimizer):
             for i in range(k):
                 np.append(Ws, self._weigh_data_points(Xs[i], GPs[i]))
             # now Xs and Ws should both be flattened w.r.t samples axis
-
             Xs = self._match_experiments(Xs, Ws, k)
 
             # TODO: integrate the different acquisition functions to form one GP
