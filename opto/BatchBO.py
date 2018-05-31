@@ -25,7 +25,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class BO(IterativeOptimizer):
+class BatchBO(IterativeOptimizer):
     def __init__(self, task, stopCriteria, parameters=DotMap()):
         """
         Bayesian optimization
