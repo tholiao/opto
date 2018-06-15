@@ -64,7 +64,7 @@ class IterativeOptimizer(Optimizer):
             if self.order == 1:
                 self.last_fx, self.last_gx = self._evaluate(parameters)
             if self.order == 2:
-                self.last_fx, self.last_gx, self.last_gx = self._evaluate(
+                self.last_fx, self.last_gx, self.last_hx = self._evaluate(
                     parameters)
 
             # Log the iter corresponding to each parameter evaluated
